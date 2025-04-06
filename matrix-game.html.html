@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Matrix Game</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .matrix { display: grid; grid-template-columns: repeat(3, 100px); gap: 10px; margin: 20px 0; }
+    .box { width: 100px; height: 100px; background: #eee; border: 1px solid #999; 
+           display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .green { background: #4CAF50 !important; color: white; }
+    .orange { background: #FF9800 !important; color: white; }
+    button { padding: 10px 20px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    function App() {
+      const [boxes, setBoxes] = React.useState(Array(9).fill(null));
+      const [clickOrder, setClickOrder] = React.useState([]);
+      const [isAnimating, setIsAnimating] = React.useState(false);
+
+      const handleClick = (index) => {
+        if (isAnimating || boxes[index]) return;
+        
+        const newBoxes = [...boxes];
+        newBoxes[index] = 'green';
+        setBoxes(newBoxes);
+        
+        const newOrder = [...clickOrder, index];
+        setClickOrder(newOrder);
+        
+        if (index === 8) animateBoxes(newOrder);
+      };
+
+      const animateBoxes = (order) => {
+        setIsAnimating(true);
+        order.forEach((boxIndex, i) => {
+          setTimeout(() => {
+            setBoxes(prev => {
+              const updated = [...prev];
+              updated[boxIndex] = 'orange';
+              return updated;
+            });
+            if (i === order.length - 1) setIsAnimating(false);
+          }, i * 500);
+        });
+      };
+
+      const reset = () => {
+        setBoxes(Array(9).fill(null));
+        setClickOrder([]);
+      };
+
+      return (
+        <div>
+          <h1>3x3 Matrix Game</h1>
+          <div className="matrix">
+            {boxes.map((_, i) => (
+              <div key={i} className="box" 
+                   style={{backgroundColor: boxes[i] ? boxes[i] : '#eee'}}
+                   onClick={() => handleClick(i)}>
+                {i + 1}
+              </div>
+            ))}
+          </div>
+          <button onClick={reset}>Reset Game</button>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
